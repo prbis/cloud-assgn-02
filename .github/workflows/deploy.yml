@@ -1,0 +1,85 @@
+name: CI/CD for Microservices
+
+on:
+  push:
+    branches:
+      - main  # Trigger the pipeline when pushing to the main branch
+
+jobs:
+  build-and-deploy:
+    name: Build and Deploy Services
+    runs-on: ubuntu-latest
+
+    env:
+      PROJECT_ID: cloud-assgn02
+      REGION: us-central1
+
+    steps:
+      # Step 1: Checkout code from the repository
+      - name: Checkout Code
+        uses: actions/checkout@v3
+
+      # Step 2: Set up Google Cloud SDK
+      - name: Set up Google Cloud SDK
+        uses: google-github-actions/setup-gcloud@v1
+        with:
+          service_account_key: ${{ secrets.GOOGLE_APPLICATION_CREDENTIALS_JSON }}
+          project_id: ${{ env.PROJECT_ID }}
+
+      # Step 3: Build and Push Docker Images for Each Service
+      - name: Build and Push API Gateway
+        run: |
+          cd api_gateway
+          docker build -t gcr.io/${{ env.PROJECT_ID }}/api_gateway:latest .
+          docker push gcr.io/${{ env.PROJECT_ID }}/api_gateway:latest
+
+      - name: Build and Push User Service V1
+        run: |
+          cd user_service_v1
+          docker build -t gcr.io/${{ env.PROJECT_ID }}/user_service_1:latest .
+          docker push gcr.io/${{ env.PROJECT_ID }}/user_service_1:latest
+
+      - name: Build and Push User Service V2
+        run: |
+          cd user_service_v2
+          docker build -t gcr.io/${{ env.PROJECT_ID }}/user_service_2:latest .
+          docker push gcr.io/${{ env.PROJECT_ID }}/user_service_2:latest
+
+      - name: Build and Push Order Service
+        run: |
+          cd order_service
+          docker build -t gcr.io/${{ env.PROJECT_ID }}/order_service:latest .
+          docker push gcr.io/${{ env.PROJECT_ID }}/order_service:latest
+
+      # Step 4: Deploy Each Service to Google Cloud Run
+      - name: Deploy API Gateway
+        run: |
+          gcloud run deploy apigateway \
+            --image gcr.io/${{ env.PROJECT_ID }}/api_gateway:latest \
+            --region ${{ env.REGION }} \
+            --platform managed \
+            --allow-unauthenticated
+
+      - name: Deploy User Service V1
+        run: |
+          gcloud run deploy userservice01 \
+            --image gcr.io/${{ env.PROJECT_ID }}/user_service_1:latest \
+            --region ${{ env.REGION }} \
+            --platform managed \
+            --allow-unauthenticated
+
+      - name: Deploy User Service V2
+        run: |
+          gcloud run deploy userservice02 \
+            --image gcr.io/${{ env.PROJECT_ID }}/user_service_2:latest \
+            --region ${{ env.REGION }} \
+            --platform managed \
+            --allow-unauthenticated
+
+      - name: Deploy Order Service
+        run: |
+          gcloud run deploy orderservice \
+            --image gcr.io/${{ env.PROJECT_ID }}/order_service:latest \
+            --region ${{ env.REGION }} \
+            --platform managed \
+            --allow-unauthenticated
