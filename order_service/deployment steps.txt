@@ -1,0 +1,31 @@
+
+
+docker build -t proddut/order_service:latest .
+docker login
+docker tag proddut/order_service:latest proddut/order_service:latest
+docker push proddut/order_service:latest
+
+latest: digest: sha256:9a22648e8bdc34d8aae551fba7a8911c42e80f6d4c1b2e880e5fee7b387f162a size: 856
+docker run -p 8080:8080 proddut/order_service:latest
+
+gcloud auth login
+gcloud config set project cloud-assgn02
+docker tag proddut/order_service:latest gcr.io/cloud-assgn02/order_service:latest
+docker push gcr.io/cloud-assgn02/order_service:latest
+gcloud run deploy orderservice --image=gcr.io/cloud-assgn02/order_service:latest --platform=managed --region=us-central1 --allow-unauthenticated
+
+Service URL: https://orderservice-806117749861.us-central1.run.app
+
+
+
+/// docker clean
+docker builder prune --all --force
+docker system prune --all --force
+
+
+
+
+
+
+
+

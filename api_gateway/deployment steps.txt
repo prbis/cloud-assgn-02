@@ -1,0 +1,31 @@
+
+
+docker build -t proddut/api_gateway:latest .
+docker login
+docker tag proddut/api_gateway:latest proddut/api_gateway:latest
+docker push proddut/api_gateway:latest
+
+latest: digest: sha256:9a22648e8bdc34d8aae551fba7a8911c42e80f6d4c1b2e880e5fee7b387f162a size: 856
+docker run -p 8080:8080 proddut/api_gateway:latest
+
+gcloud auth login
+gcloud config set project cloud-assgn02
+docker tag proddut/api_gateway:latest gcr.io/cloud-assgn02/api_gateway:latest
+docker push gcr.io/cloud-assgn02/api_gateway:latest
+gcloud run deploy apigateway --image=gcr.io/cloud-assgn02/api_gateway:latest --platform=managed --region=us-central1 --allow-unauthenticated
+
+Service URL: https://apigateway-806117749861.us-central1.run.app
+
+
+
+/// docker clean
+docker builder prune --all --force
+docker system prune --all --force
+
+
+
+
+
+
+
+

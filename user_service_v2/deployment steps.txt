@@ -1,0 +1,31 @@
+
+
+docker build -t proddut/user_service_2:latest .
+docker login
+docker tag proddut/user_service_2:latest proddut/user_service_2:latest
+docker push proddut/user_service_2:latest
+
+latest: digest: sha256:9a22648e8bdc34d8aae551fba7a8911c42e80f6d4c1b2e880e5fee7b387f162a size: 856
+docker run -p 8080:8080 proddut/user_service_2:latest
+
+gcloud auth login
+gcloud config set project cloud-assgn02
+docker tag proddut/user_service_2:latest gcr.io/cloud-assgn02/user_service_2:latest
+docker push gcr.io/cloud-assgn02/user_service_2:latest
+gcloud run deploy userservice02 --image=gcr.io/cloud-assgn02/user_service_2:latest --platform=managed --region=us-central1 --allow-unauthenticated
+
+Service URL: https://userservice02-806117749861.us-central1.run.app
+
+
+
+/// docker clean
+docker builder prune --all --force
+docker system prune --all --force
+
+
+
+
+
+
+
+
